@@ -4,6 +4,11 @@ version = "0.1.0"
 author = ["RanXom <saiyedshizain@gmail.com>"]
 edition = "2024"
 
+[[bin]]
+name = "blog_os"
+test = false
+bench = false
+
 [dependencies]
 
 [profile.dev]
