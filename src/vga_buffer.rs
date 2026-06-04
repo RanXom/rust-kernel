@@ -24,14 +24,15 @@ pub enum Colors {
 struct ColorCode(u8);
 
 impl ColorCode {
-    fn new(foreground: Color, background: Color) -> ColorCode {
+    fn new(foreground: Colors, background: Colors) -> ColorCode {
         // need this bitwise voodoo shit
+        // combines bg and fg so the vga can understand what to do
         ColorCode((background as u8) << 4 | (foreground as u8))
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(c)]
+#[repr(C)]
 struct ScreenChar {
     ascii_character: u8,
     color_code: ColorCode,
@@ -44,3 +45,42 @@ const BUFFER_WIDTH: usize = 80;
 struct Buffer {
     chars: [[ScreenChar; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
+
+pub struct Writer {
+    column_position: usize,
+    color_code: ColorCode,
+    buffer: &'static mut Buffer,
+}
+
+impl Writer {
+    pub fn write_byte(&mut self, byte: u8) {
+        match byte {
+            byte => {
+                let row = BUFFER_HEIGHT - 1;
+                let col = self.column_position;
+
+                let color_code = self.color_code;
+                self.buffer.chars[row][col] = ScreenChar {
+                    ascii_character: byte,
+                    color_code,
+                };
+
+                self.column_position += 1;
+            },
+        }
+    }
+}
+
+pub fn print_something() {
+    let mut writer = Writer {
+        column_position: 0,
+        color_code: ColorCode::new(Colors::Yellow, Colors::Black),
+        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+    };
+
+    writer.write_byte(b'H');
+    writer.write_byte(b'e');
+    writer.write_byte(b'h');
+    writer.write_byte(b'e');
+}
+
