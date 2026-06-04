@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Colors {
@@ -17,4 +17,30 @@ pub enum Colors {
     Pink = 13,
     Yellow = 14,
     White = 15,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(transparent)]
+struct ColorCode(u8);
+
+impl ColorCode {
+    fn new(foreground: Color, background: Color) -> ColorCode {
+        // need this bitwise voodoo shit
+        ColorCode((background as u8) << 4 | (foreground as u8))
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(c)]
+struct ScreenChar {
+    ascii_character: u8,
+    color_code: ColorCode,
+}
+
+const BUFFER_HEIGHT: usize = 25;
+const BUFFER_WIDTH: usize = 80;
+
+#[repr(transparent)]
+struct Buffer {
+    chars: [[ScreenChar; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
