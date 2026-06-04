@@ -1,3 +1,13 @@
+use volatile::Volatile;
+use core::fmt::{self, Write};
+
+impl fmt::Write for Writer {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.write_string(s);
+        Ok(())
+    }
+}
+
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -97,11 +107,5 @@ pub fn print_something() {
         buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
     };
 
-    writer.write_byte(b'H');
-    writer.write_byte(b'e');
-    writer.write_byte(b'h');
-    writer.write_byte(b'e');
-
-    writer.write_string(" Grace");
+    write!(writer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
 }
-
