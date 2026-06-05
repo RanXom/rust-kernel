@@ -96,7 +96,25 @@ impl Writer {
     }
 
     pub fn new_line(&mut self) {
-        // TODO
+        for row in 1..BUFFER_HEIGHT {
+            for col in 0..BUFFER_WIDTH {
+                let character = self.buffer.chars[row][col].read();
+                self.buffer.chars[row - 1][col].write(character);
+            }
+        }
+        self.clear_row(BUFFER_HEIGHT - 1);
+        self.column_position = 0;
+    }
+
+    pub fn clear_row(&mut self, row: usize) {
+        let blank = ScreenChar {
+            ascii_character: b' ',
+            color_code: self.color_code,
+        };
+
+        for col in 0..BUFFER_WIDTH {
+            self.buffer.chars[row][col].write(blank);
+        }
     }
 }
 
@@ -108,4 +126,5 @@ pub fn print_something() {
     };
 
     write!(writer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
+    write!(writer, "\nTHIS MUST EXCEED THE LINE: 2349785029835092840592840598240598240598240958204958204958204958230945820498520945278469824760829").unwrap();
 }
