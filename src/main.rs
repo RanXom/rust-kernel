@@ -14,16 +14,10 @@ static HELLO: &[u8] = b"AMAZE! AMAZE! AMAZE!";
 
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    let vga_buffer = 0xb8000 as *mut u8;
+    use core::fmt::Write;
 
-    for (i, &byte) in HELLO.iter().enumerate() {
-        unsafe {
-            *vga_buffer.offset(i as isize * 2) = byte;
-            *vga_buffer.offset(i as isize * 2 + 1) = 0xb;
-        }
-    }
-
-    vga_buffer::print_something();
+    vga_buffer::WRITER.lock().write_str("Hola agayn").unwrap();
+    write!(vga_buffer::WRITER.lock(), ", some numeros: {} {}", 42, 1.338).unwrap();
 
     loop {}
 }

@@ -1,5 +1,7 @@
 use volatile::Volatile;
 use core::fmt::{self, Write};
+use lazy_static::lazy_static;
+use spin::Mutex;
 
 impl fmt::Write for Writer {
     fn write_str(&mut self, s: &str) -> fmt::Result {
@@ -62,6 +64,14 @@ pub struct Writer {
     buffer: &'static mut Buffer,
 }
 
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
+        column_position: 0,
+        color_code: ColorCode::new(Colors::Yellow, Colors::Black),
+        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+    });
+}
+
 impl Writer {
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
@@ -116,15 +126,4 @@ impl Writer {
             self.buffer.chars[row][col].write(blank);
         }
     }
-}
-
-pub fn print_something() {
-    let mut writer = Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Colors::Yellow, Colors::Black),
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    };
-
-    write!(writer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
-    write!(writer, "\nTHIS MUST EXCEED THE LINE: 2349785029835092840592840598240598240598240958204958204958204958230945820498520945278469824760829").unwrap();
 }
